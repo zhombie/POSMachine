@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 
 /**
  * Copyright 2015 LeeryBit
@@ -40,6 +42,154 @@ public class TicketBuilder {
 
   public TicketBuilder isCyrillic(boolean cyrillic) {
     if (cyrillic) ticket.setCyrillic();
+    return this;
+  }
+
+  public TicketBuilder raw(String raw, String... values) throws IOException {
+    Reader inputReader = new StringReader(raw);
+
+    BufferedReader bufferedReader = new BufferedReader(inputReader);
+    String line;
+
+    int lineNumber = -3;
+    int arg = 0;
+    while ((line = bufferedReader.readLine()) != null) {
+      if (line.startsWith("^")) {
+        if (lineNumber == -3) {
+          // TODO check version!
+        } else if (lineNumber == -2) {
+          PrinterFonts.FontGroup group;
+          try {
+            group = PrinterFonts.FontGroup.valueOf(line.substring(1));
+          } catch (IllegalArgumentException | NullPointerException e) {
+            group = PrinterFonts.FontGroup.BASIC;
+          }
+
+          PrinterFonts.setFontGroup(group);
+        } else if (lineNumber == -1) {
+          // TODO set character set
+        } else {
+          while (line.contains("~")) {
+            line = line.replace("~", values[arg]);
+            arg++;
+          }
+
+          String[] items = line.substring(1).split(":", 2);
+          if (items.length > 2) continue;
+
+          boolean small = false;
+          boolean bold = false;
+          boolean huge = false;
+          boolean wide = false;
+          boolean underline = false;
+
+          String[] keys = items[0].toUpperCase().split("&");
+          for (String key : keys) {
+            if ("S".equals(key) || "SMALL".equals(key)) {
+              small = true;
+            } else if ("B".equals(key) || "BOLD".equals(key)) {
+              bold = true;
+            } else if ("H".equals(key) || "HUGE".equals(key)) {
+              huge = true;
+            } else if ("W".equals(key) || "WIDE".equals(key)) {
+              wide = true;
+            } else if ("U".equals(key) || "UNDERLINE".equals(key)) {
+              underline = true;
+            }
+          }
+
+          int charsOnLine = this.charsOnLine;
+          if (small && wide) {
+            charsOnLine = PrinterFonts.smallWideCharsOnLine(charsOnLine);
+          } else if (wide) {
+            charsOnLine = PrinterFonts.wideCharsOnLine(charsOnLine);
+          } else if (small) {
+            charsOnLine = PrinterFonts.smallCharsOnLine(charsOnLine);
+          }
+          ticket.charsOnLine = charsOnLine;
+
+          ticket.putBytes(PrinterFonts.font(small, bold, huge, wide, underline));
+
+          boolean find = false;
+          for (String key : keys) {
+            if ("HD".equals(key) || "HEADER".equals(key)) {
+              header(items[1]);
+              find = true;
+              break;
+            }
+            if ("SHD".equals(key) || "SUB_HEADER".equals(key)) {
+              subHeader(items[1]);
+              find = true;
+              break;
+            }
+            if ("C".equals(key) || "CENTER".equals(key)) {
+              text(items[1], TextAlignment.CENTER);
+              find = true;
+              break;
+            }
+            if ("R".equals(key) || "RIGHT".equals(key)) {
+              text(items[1], TextAlignment.RIGHT);
+              find = true;
+              break;
+            }
+            if ("A".equals(key) || "ACCENT".equals(key)) {
+              find = true;
+              String[] ss = items[1].split("|");
+              if (ss.length != 2) break;
+              accent(ss[0], ss[1].charAt(0));
+              break;
+            }
+            if ("HR".equals(key)) {
+              if (items.length == 1) {
+                divider();
+              } else {
+                divider(items[1].charAt(0));
+              }
+              find = true;
+              break;
+            }
+            if ("HRD".equals(key)) {
+              dividerDouble();
+              find = true;
+              break;
+            }
+            if ("BR".equals(key)) {
+              int count = 1;
+              if (items.length == 2) {
+                count = Integer.valueOf(items[1]);
+              }
+
+              feedLine(count);
+              find = true;
+              break;
+            }
+            if ("*".equals(key) || "STARED".equals(key)) {
+              stared(items[1]);
+              find = true;
+              break;
+            }
+            if ("M".equals(key) || "MENU".equals(key)) {
+              String[] ss = items[1].split("\\|", 3);
+              if (ss.length == 2) {
+                menuLine(ss[0], ss[1]);
+              } else if (ss.length == 3) {
+                menuLine(ss[0], ss[1], ss[2].charAt(0));
+              }
+              find = true;
+              break;
+            }
+          }
+
+          if (!find && items.length == 2) text(items[1]);
+          // ticket.putBytes("\n".getBytes());
+          ticket.putBytes(PrinterFonts.resetFont());
+        }
+
+        lineNumber++;
+      }
+    }
+
+    ticket.charsOnLine = charsOnLine;
     return this;
   }
 

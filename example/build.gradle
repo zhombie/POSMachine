@@ -2,17 +2,13 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 
-def signingFile = file("./signing.gradle")
-if (signingFile.exists())
-  apply from: signingFile
-
 android {
-  compileSdkVersion 28
+  compileSdkVersion 29
 
   defaultConfig {
     applicationId "io.github.iyaroslav.posprinter"
     minSdkVersion 15
-    targetSdkVersion 28
+    targetSdkVersion 29
     versionCode 1
     versionName "1.0"
   }
@@ -20,20 +16,21 @@ android {
   buildTypes {
     debug {
       debuggable true
-      signingConfig signingConfigs.release
     }
     release {
       debuggable false
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-      signingConfig signingConfigs.release
     }
   }
 }
 
 dependencies {
   implementation fileTree(include: ['*.jar'], dir: 'libs')
-  implementation 'com.android.support:appcompat-v7:28.0.0'
-  implementation 'com.google.android.gms:play-services-analytics:16.0.6'
+  implementation 'androidx.appcompat:appcompat:1.1.0'
+  implementation 'com.google.android.gms:play-services-analytics:17.0.0'
+  implementation 'com.squareup.retrofit2:retrofit:2.6.2'
+  implementation 'com.google.code.gson:gson:2.8.6'
+  implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
   implementation project(':library')
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

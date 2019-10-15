@@ -6,6 +6,8 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.Gravity;
 
+import androidx.appcompat.widget.AppCompatTextView;
+
 import com.leerybit.escpos.Ticket;
 
 /**
@@ -23,7 +25,7 @@ import com.leerybit.escpos.Ticket;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class TicketPreview extends android.support.v7.widget.AppCompatTextView {
+public class TicketPreview extends AppCompatTextView {
 
   private static Typeface typeface;
 

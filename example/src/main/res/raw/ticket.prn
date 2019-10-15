@@ -1,38 +1,23 @@
 ^V1
 ^BASIC
 ^CYRILLIC
-^HD&B:PosPrinter
+^C:Счет №: ~
+^C:Дата: ~
+^C:Официант: ~
+^C:Стол №: ~
 ^HR
-^:Date: ~
-^:Time: ~
-^:Ticket No: ~
+^M:Наименование - кол-во.|Сумма
 ^HR
-^SHD:Hot dishes
-Нужно сделать повторы!
-
-^M:- 3 Kazan kabob|60,00|.
-^M:- 2 Full-Rack Ribs|32,00|.
-^R:Total: 92,00
+^M:Нарын - 1|650
+^M:Лагман - 1|600
+^M:Фарш - 2|700
+^M:Мини рулет - 4|1400
+^M:Антрекот - 1|1000
+^M:Арабика - 1|280
+^HR
+^R:Сумма: 4630
+^R:Обслуживание 10%: 463
 ^BR
-^SHD:Salads
-^M:- 1 Turkey & Swiss|4,50
-^M:- 1 Classic Cheese|3,30
-^M:- 1 Chicken Caesar Salad|7,00
-^R:Total: 14,80
 ^BR
-^SHD:Desserts
-^M:- 1 Blondie|5,00
-^M:- 2 Chocolate Cake|7,00
-^R:Total: 12,00
-^BR
-^SHD:Drinkables
-^B&C:50% sale for Coke on mondays!
-^M:- 3 Coca-Cola|6,00
-^M:- 7 Tea|3,50
-^M:- 2 Coffee|3,00
-^R:Total: 12,50
-^HRD
-^M:Total gift|3,00
-^B&M&H&W:Total|843 000
-^HRD
-^*:THANK YOU
+^B&M&H&W:Итого:|5093
+^HR

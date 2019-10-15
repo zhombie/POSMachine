@@ -1,64 +1,69 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:orientation="vertical"
-  tools:context=".MainActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:fillViewport="true"
+    tools:context=".MainActivity">
 
   <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin">
-
-    <Button
-      android:id="@+id/btn_search"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:onClick="handleButtonClick"
-      android:text="@string/action_connect" />
+      android:orientation="vertical"
+      android:paddingLeft="@dimen/activity_horizontal_margin"
+      android:paddingTop="@dimen/activity_vertical_margin"
+      android:paddingRight="@dimen/activity_horizontal_margin"
+      android:paddingBottom="@dimen/activity_vertical_margin">
 
-    <Button
-      android:id="@+id/btn_print_raw"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:onClick="handleButtonClick"
-      android:text="@string/action_print_raw" />
-
-    <Button
-      android:id="@+id/btn_print_programmatically"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:onClick="handleButtonClick"
-      android:text="@string/action_print_programmatically" />
-
-    <TextView
-      android:id="@+id/tv_state"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="16dp"
-      android:layout_marginBottom="8dp"
-      android:text="@string/title_state"
-      android:textColor="@color/text" />
-
-    <TextView
-      android:id="@+id/tv_message"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="8dp"
-      android:text="@string/title_message"
-      android:textColor="@color/text" />
+    <EditText
+        android:id="@+id/inputText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="13sp" />
 
     <com.leerybit.escpos.widgets.TicketPreview
-      android:id="@+id/ticket"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:paddingLeft="@dimen/activity_vertical_margin"
-      android:paddingRight="@dimen/activity_vertical_margin"
-      android:textColor="#000" />
+        android:id="@+id/ticket"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:paddingLeft="@dimen/activity_vertical_margin"
+        android:paddingRight="@dimen/activity_vertical_margin"
+        android:textColor="#000"
+        android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/tv_state"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/title_state"
+        android:textColor="@color/text"
+        android:textSize="13sp" />
+
+    <Button
+        android:id="@+id/btn_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="handleButtonClick"
+        android:text="@string/action_connect"
+        android:textSize="13sp" />
+
+    <Button
+        android:id="@+id/btn_preview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="handleButtonClick"
+        android:text="@string/action_preview"
+        android:textSize="13sp" />
+
+    <Button
+        android:id="@+id/btn_print"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="handleButtonClick"
+        android:text="@string/action_print"
+        android:textSize="13sp" />
 
   </LinearLayout>
+
 </ScrollView>
