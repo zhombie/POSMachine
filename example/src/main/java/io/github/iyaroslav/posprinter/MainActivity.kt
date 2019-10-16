@@ -82,7 +82,13 @@ class MainActivity : AppCompatActivity() {
 
     fun handleButtonClick(view: View) {
         when (view.id) {
-            R.id.btn_search -> if (printer.isConnected) printer.disconnect() else printer.connect()
+            R.id.btn_search -> if (printer.isConnected) {
+                btn_search.setText(R.string.action_disconnect)
+                printer.disconnect()
+            } else {
+                btn_search.setText(R.string.action_connect)
+                printer.connect()
+            }
             R.id.btn_preview -> prepareRawTicket(save=true, is_preview=true)
             R.id.btn_print -> prepareRawTicket(save=false, is_print=true)
         }
