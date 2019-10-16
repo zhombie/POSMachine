@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity() {
             R.id.btn_search -> if (printer.isConnected) {
                 printer.disconnect()
             } else {
-                btn_search.setText(R.string.action_connect)
+                printer.connect()
             }
             R.id.btn_preview -> prepareRawTicket(save=true, is_preview=true)
             R.id.btn_print -> prepareRawTicket(save=false, is_print=true)
