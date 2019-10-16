@@ -1,14 +1,13 @@
 package io.github.iyaroslav.posprinter
 
-import io.github.iyaroslav.posprinter.MainActivity.Companion.BASE_URL
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class ApiManager {
 
-    fun create(): TicketService {
+    fun create(url: String): TicketService {
         val retrofit: Retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(url)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 

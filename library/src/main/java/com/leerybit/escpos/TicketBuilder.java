@@ -6,7 +6,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.StringReader;
 
 /**
@@ -46,7 +45,7 @@ public class TicketBuilder {
   }
 
   public TicketBuilder raw(String raw, String... values) throws IOException {
-    Reader inputReader = new StringReader(raw);
+    StringReader inputReader = new StringReader(raw);
 
     BufferedReader bufferedReader = new BufferedReader(inputReader);
     String line;

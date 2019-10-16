@@ -1,6 +1,7 @@
 package io.github.iyaroslav.posprinter
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.view.View
@@ -25,12 +26,12 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
 
     companion object {
-        const val BASE_URL = "http://grand.help-it.kz/"
+        private const val BASE_URL = "http://grand.help-it.kz/"
         const val DEFAULT_URL = "${BASE_URL}api/orders/32/print/check/"
-    }
 
-    private val manager: ApiManager by lazy { ApiManager() }
-    private val service: TicketService by lazy { manager.create() }
+        private const val PRIVATE_MODE = 0
+        private const val PREFERENCES_NAME = "url"
+    }
 
     private val printer by lazy { PosPrinter60mm(this) }
     private val preview by lazy { findViewById<TicketPreview>(R.id.ticket) }
@@ -38,6 +39,8 @@ class MainActivity : AppCompatActivity() {
 
     private var ticket: Ticket? = null
     private var tickerNumber = 1
+
+    private val cache: SharedPreferences by lazy { getSharedPreferences(PREFERENCES_NAME, PRIVATE_MODE) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        inputText.setText(DEFAULT_URL)
+        inputText.setText(cache.getString(PREFERENCES_NAME, DEFAULT_URL))
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -80,14 +83,14 @@ class MainActivity : AppCompatActivity() {
     fun handleButtonClick(view: View) {
         when (view.id) {
             R.id.btn_search -> if (printer.isConnected) printer.disconnect() else printer.connect()
-            R.id.btn_preview -> previewRawTicket()
-            R.id.btn_print -> printRawTicket()
+            R.id.btn_preview -> prepareRawTicket(save=true, is_preview=true)
+            R.id.btn_print -> prepareRawTicket(save=false, is_print=true)
         }
     }
 
     private fun previewRawTicket() {
         try {
-            prepareRawTicket()
+//            prepareRawTicket()
 
             if (ticket == null) {
                 Toast.makeText(this, "Пожалуйста, подготовьте квитанцию сперва", Toast.LENGTH_SHORT).show()
@@ -102,7 +105,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun printRawTicket() {
         try {
-            prepareRawTicket()
+//            prepareRawTicket()
 
             if (ticket == null) {
                 Toast.makeText(this, "Пожалуйста, подготовьте квитанцию сперва", Toast.LENGTH_SHORT).show()
@@ -115,50 +118,112 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun prepareRawTicket() {
-        var ticketData: io.github.iyaroslav.posprinter.Ticket? = null
+    private fun prepareRawTicket(save: Boolean, is_preview: Boolean = false, is_print: Boolean = false) {
+        if (save) {
+            val editor = cache.edit()
+            editor.putString(PREFERENCES_NAME, inputText?.text?.toString())
+            editor.apply()
+        }
 
-        val call = service.getTicket(inputText.text.toString().drop(BASE_URL.length))
-        call.enqueue(object : Callback<io.github.iyaroslav.posprinter.Ticket>{
+        val url = inputText.text.toString()
+
+        val manager = ApiManager()
+        val service = manager.create(url)
+
+        progressBar.visibility = View.VISIBLE
+
+        service.getTicket().enqueue(object : Callback<io.github.iyaroslav.posprinter.Ticket> {
             override fun onResponse(
                 call: Call<io.github.iyaroslav.posprinter.Ticket>,
                 response: Response<io.github.iyaroslav.posprinter.Ticket>
             ) {
-                ticketData = response.body()
+                var newRaw = "^V1" + "\n^BASIC" + "\n^CYRILLIC"
+
+                val ticketData = response.body()
+                val args = arrayListOf<String>()
+
+                ticketData?.let {
+                    if (ticketData.ticketNumber != null) {
+                        args.add((tickerNumber++).toString() + "")
+                        newRaw = newRaw.plus("\n^C:Счет №: ~")
+                    }
+
+                    if (ticketData.dateEnabled != null) {
+                        args.add(DateFormat.format("dd.MM.yyyy, HH:mm", Date()).toString())
+                        newRaw = newRaw.plus("\n^C:Дата: ~")
+                    }
+
+                    if (ticketData.garson != null) {
+                        args.add(ticketData.garson ?: "")
+                        newRaw = newRaw.plus("\n^C:Официант: ~")
+                    }
+
+                    if (ticketData.table != null) {
+                        args.add(ticketData.table ?: "")
+                        newRaw = newRaw.plus("\n^C:Стол №: ~")
+                    }
+
+                    ticketData.raw?.let { raw ->
+                        val arguments = args.toTypedArray()
+
+                        ticket = if (arguments.isNullOrEmpty()) {
+                            TicketBuilder(printer)
+                                .isCyrillic(true)
+                                .raw(newRaw)
+                                .build()
+                        } else {
+                            newRaw = newRaw.plus("\n^HR" + "\n^M:Наименование - кол-во.|Сумма" + "\n^HR")
+
+                            val formattedRaw = raw.replace("^", "\n^")
+
+                            newRaw = newRaw.plus(formattedRaw)
+
+                            newRaw = newRaw.plus("\n^HR")
+
+                            if (ticketData.sum != null) {
+                                newRaw = newRaw.plus("\n^R:Сумма: ${ticketData.sum}")
+                            }
+
+                            if (ticketData.service != null) {
+                                val serviceAmount = (ticketData.sum ?: 0L) * (ticketData.service ?: 0L) / 100
+                                newRaw = newRaw.plus("\n^R:Обслуживание ${ticketData.service}%: $serviceAmount")
+                            }
+
+                            if (ticketData.totalSum != null) {
+                                newRaw = newRaw.plus("\n^BR" + "\n^BR" + "\n^B&M&H&W:Итого:|${ticketData.totalSum}")
+                                newRaw = newRaw.plus("\n^HR")
+                            }
+
+                            progressBar.visibility = View.GONE
+
+                            TicketBuilder(printer)
+                                .isCyrillic(true)
+                                .raw(newRaw, *arguments)
+                                .build()
+                        }
+
+                        if (is_preview) {
+                            preview.setTicket(ticket)
+                        } else if (is_print) {
+                            printer.send(ticket)
+                        }
+                    }
+                }
             }
 
             override fun onFailure(
                 call: Call<io.github.iyaroslav.posprinter.Ticket>,
                 t: Throwable
             ) {
-                Toast.makeText(this@MainActivity, "Ошибка, не получилось загрузить данные", Toast.LENGTH_SHORT).show()
+                progressBar.visibility = View.GONE
+
+                Toast.makeText(
+                    this@MainActivity,
+                    "Ошибка, не получилось загрузить данные",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         })
-
-        if (ticketData?.raw.isNullOrBlank()) {
-            ticket = TicketBuilder(printer)
-                .isCyrillic(true)
-                .raw(
-                    this,
-                    R.raw.ticket,
-                    (tickerNumber++).toString() + "",
-                    DateFormat.format("dd.MM.yyyy, HH:mm", Date()).toString(),
-                    ticketData?.garson ?: "",
-                    ticketData?.table ?: ""
-                )
-                .build()
-        } else {
-            ticket = TicketBuilder(printer)
-                .isCyrillic(true)
-                .raw(
-                    ticketData?.raw,
-                    (tickerNumber++).toString() + "",
-                    DateFormat.format("dd.MM.yyyy, HH:mm", Date()).toString(),
-                    ticketData?.garson ?: "",
-                    ticketData?.table ?: ""
-                )
-                .build()
-        }
     }
 
     private fun setState(value: String, color: Int) {

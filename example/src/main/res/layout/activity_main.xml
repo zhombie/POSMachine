@@ -21,14 +21,27 @@
         android:layout_height="wrap_content"
         android:textSize="13sp" />
 
-    <com.leerybit.escpos.widgets.TicketPreview
-        android:id="@+id/ticket"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_weight="1"
         android:paddingLeft="@dimen/activity_vertical_margin"
-        android:paddingRight="@dimen/activity_vertical_margin"
-        android:textColor="#000"
-        android:layout_weight="1" />
+        android:paddingRight="@dimen/activity_vertical_margin">
+
+      <com.leerybit.escpos.widgets.TicketPreview
+          android:id="@+id/ticket"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:textColor="#000" />
+
+      <ProgressBar
+          android:id="@+id/progressBar"
+          android:layout_width="30dp"
+          android:layout_height="30dp"
+          android:layout_gravity="center"
+          android:visibility="gone" />
+
+    </FrameLayout>
 
     <TextView
         android:id="@+id/tv_state"

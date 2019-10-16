@@ -5,7 +5,7 @@ import retrofit2.http.GET
 
 interface TicketService {
 
-    @GET("")
-    fun getTicket(url: String): Call<Ticket>
+    @GET(".")
+    fun getTicket(): Call<Ticket>
 
 }
