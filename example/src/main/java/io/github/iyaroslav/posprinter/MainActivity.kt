@@ -167,6 +167,16 @@ class MainActivity : AppCompatActivity() {
                         val arguments = args.toTypedArray()
 
                         ticket = if (arguments.isNullOrEmpty()) {
+                            newRaw = newRaw.plus("\n^HR" + "\n^M:Наименование - кол-во.|Сумма" + "\n^HR")
+
+                            val formattedRaw = raw.replace("^", "\n^")
+
+                            newRaw = newRaw.plus(formattedRaw)
+
+                            newRaw = newRaw.plus("\n^HR\n^BR\n^BR\n^BR\n^BR\n^BR")
+
+                            progressBar.visibility = View.GONE
+
                             TicketBuilder(printer)
                                 .isCyrillic(true)
                                 .raw(newRaw)
@@ -193,6 +203,8 @@ class MainActivity : AppCompatActivity() {
                                 newRaw = newRaw.plus("\n^BR" + "\n^BR" + "\n^B&M&H&W:Итого:|${ticketData.totalSum}")
                                 newRaw = newRaw.plus("\n^HR")
                             }
+
+                            newRaw = newRaw.plus("\n^BR\n^BR\n^BR\n^BR\n^BR")
 
                             progressBar.visibility = View.GONE
 
